@@ -8,6 +8,52 @@ npm-debug.log*
 
 # Ignora i file di ambiente
 .env
+
+# Python libraries and environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+ENV/
+.venv/
+.env/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Flask
+instance/
+.webassets-cache
+
+# Local development settings
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Only ignore files in this folder (not in subdirectories)
+# To ignore files in subdirectories, remove the leading slash
+/temp_files/
+/output/
 .env.local
 .env.development.local
 .env.test.local
