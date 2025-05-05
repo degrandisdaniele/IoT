@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arduino Sensor Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Arduino Sensor Dashboard</h1>
+      <p class="status">Status: <span id="connection-status">Connecting...</span></p>
+    </header>
+    
+    <div class="dashboard">
+      <div class="card">
+        <h2>Temperature</h2>
+        <div class="gauge-container">
+          <canvas id="temperature-gauge"></canvas>
+          <div class="gauge-value" id="temperature-value">--°C</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>Humidity</h2>
+        <div class="gauge-container">
+          <canvas id="humidity-gauge"></canvas>
+          <div class="gauge-value" id="humidity-value">--%</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>Light Level</h2>
+        <div class="gauge-container">
+          <canvas id="light-gauge"></canvas>
+          <div class="gauge-value" id="light-value">--</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="chart-container">
+      <h2>Historical Data</h2>
+      <div class="chart-controls">
+        <select id="data-type">
+          <option value="temperature">Temperature</option>
+          <option value="humidity">Humidity</option>
+          <option value="light">Light Level</option>
+        </select>
+        <select id="time-range">
+          <option value="1h">Last Hour</option>
+          <option value="6h">Last 6 Hours</option>
+          <option value="24h" selected>Last 24 Hours</option>
+          <option value="7d">Last 7 Days</option>
+        </select>
+      </div>
+      <canvas id="history-chart"></canvas>
+    </div>
+    
+    <div class="data-table-container">
+      <h2>Recent Readings</h2>
+      <table id="data-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Temperature</th>
+            <th>Humidity</th>
+            <th>Light</th>
+          </tr>
+        </thead>
+        <tbody id="data-table-body">
+          <!-- Data will be inserted here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <script src="app.js"></script>
+</body>
+</html>

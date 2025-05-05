@@ -2,7 +2,7 @@
 #include <WiFiNINA.h>
 
 // WiFi network credentials - will be set via Serial
-String ssid = "";
+String ssid = "";  
 String password = "";
 String username = "";
 bool isEnterpriseNetwork = false;

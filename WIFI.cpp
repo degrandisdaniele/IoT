@@ -6,7 +6,7 @@
 const char* ssid = "YourWiFiName";     // Replace with your WiFi network name
 const char* password = "YourPassword";  // Replace with your WiFi password
 const char* username = "YourUsername";  // Replace with your WiFi username (for enterprise networks)
-bool isEnterpriseNetwork = false;       // Set to true if your network requires username+password
+bool isEnterpriseNetwork = true;       // Set to true if your network requires username+password
 
 // Web server on port 80
 WiFiServer server(80);
