@@ -4,13 +4,13 @@
 #include <ArduinoJson.h>
 
 // WiFi credentials
-const char* ssid = "YourWiFiName";     // Replace with your WiFi name
-const char* password = "YourPassword";  // Replace with your WiFi password
+const char* ssid = "iPhone di Daniele";     // Replace with your WiFi network name
+const char* password = "123456789";  // Replace with your WiFi password
 const char* username = "";             // For enterprise networks only
 bool isEnterpriseNetwork = false;      // Set to true for enterprise networks
 
 // Server details
-const char serverAddress[] = "your-server-address.com"; // Replace with your server address
+const char serverAddress[] = "172.20.10.15"; // Replace with your server address
 const int serverPort = 3000;                           // Replace with your server port
 const String apiEndpoint = "/api/data";                // Replace with your API endpoint
 
@@ -67,57 +67,52 @@ void loop() {
 }
 
 void connectToWiFi() {
-  Serial.print("Connecting to WiFi network: ");
-  Serial.println(ssid);
-  
-  // Check for the WiFi module
-  if (WiFi.status() == WL_NO_MODULE) {
-    Serial.println("Communication with WiFi module failed!");
-    // Indicate error with rapid blinking
-    while (true) {
-      digitalWrite(statusLed, HIGH);
-      delay(100);
-      digitalWrite(statusLed, LOW);
-      delay(100);
+    Serial.print("Connecting to WiFi network: ");
+    Serial.println(ssid);
+    
+    // Check for the WiFi module
+    if (WiFi.status() == WL_NO_MODULE) {
+      Serial.println("Communication with WiFi module failed!");
+      // Don't continue
+      while (true);
     }
-  }
   
-  // Check firmware version
-  String fv = WiFi.firmwareVersion();
-  if (fv < WIFI_FIRMWARE_LATEST_VERSION) {
-    Serial.println("Please upgrade the WiFi firmware");
-  }
+    // Check firmware version
+    String fv = WiFi.firmwareVersion();
+    if (fv < WIFI_FIRMWARE_LATEST_VERSION) {
+      Serial.println("Please upgrade the firmware");
+    }
   
-  // Connect to WiFi
-  if (isEnterpriseNetwork && username != NULL && strlen(username) > 0) {
-    // For enterprise networks
-    WiFi.beginEnterprise(ssid, username, password);
-  } else {
-    // For regular networks
-    WiFi.begin(ssid, password);
+    // Attempt to connect to WiFi network
+    int status = WL_IDLE_STATUS;
+    
+    if (isEnterpriseNetwork) {
+      // For enterprise networks (WPA2-Enterprise)
+      Serial.println("Using enterprise WiFi authentication");
+      WiFi.beginEnterprise(ssid, username, password);
+      
+      // Wait for connection
+      Serial.print("Waiting for connection");
+      while (WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+        Serial.print(".");
+      }
+    } else {
+      // For regular WPA/WPA2 networks
+      while (status != WL_CONNECTED) {
+        Serial.print("Attempting to connect to SSID: ");
+        Serial.println(ssid);
+        
+        // Connect to WPA/WPA2 network
+        status = WiFi.begin(ssid, password);
+        
+        // Wait 10 seconds for connection
+        delay(10000);
+      }
+    }
+    
+    Serial.println("Connected to WiFi");
   }
-  
-  // Wait for connection
-  int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
-    digitalWrite(statusLed, !digitalRead(statusLed)); // Toggle LED
-    delay(500);
-    Serial.print(".");
-    attempts++;
-  }
-  
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println();
-    Serial.println("WiFi connected!");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-    digitalWrite(statusLed, HIGH); // LED on when connected
-  } else {
-    Serial.println();
-    Serial.println("Failed to connect to WiFi. Please check credentials.");
-    digitalWrite(statusLed, LOW); // LED off when not connected
-  }
-}
 
 float readTemperature() {
   // Read temperature sensor (example using analog sensor)
