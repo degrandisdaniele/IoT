@@ -1,0 +1,38 @@
+# Ignora i moduli di Node.js
+node_modules/
+
+# Ignora i file di log
+logs
+*.log
+npm-debug.log*
+
+# Ignora i file di ambiente
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignora i file di dipendenze
+package-lock.json
+yarn.lock
+
+# Ignora i file di build
+/build
+/dist
+
+# Ignora i file temporanei
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignora i file di backup
+*.bak
+*.backup
+*~
+
+# Ignora i file di configurazione personali
+config.js
+config.json
