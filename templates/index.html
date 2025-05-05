@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Data Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>IoT Data Dashboard</h1>
+            <p>Real-time data from your Arduino device</p>
+        </header>
+        
+        <main>
+            <div class="status-container">
+                <div class="status-indicator" id="connection-status">
+                    <span class="status-dot disconnected"></span>
+                    <span class="status-text">Disconnected</span>
+                </div>
+                <div class="last-update" id="last-update">Last update: Never</div>
+            </div>
+            
+            <div class="data-container" id="data-container">
+                <div class="no-data-message">Waiting for data...</div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Arduino IoT Project &copy; 2023</p>
+        </footer>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
