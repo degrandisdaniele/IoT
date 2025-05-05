@@ -27,7 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle new data
     socket.on('new_data', function(data) {
-        console.log('Received new data:', data);
+        // Stampa i dati ricevuti nella console del browser
+        console.log('Dati ricevuti dal server:', data);
         updateDataDisplay(data);
         updateLastUpdateTime();
     });

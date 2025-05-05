@@ -4,20 +4,21 @@
 #include <ArduinoJson.h>
 
 // WiFi credentials
-const char* ssid = "iPhone di Daniele";     // Replace with your WiFi network name
-const char* password = "123456789";  // Replace with your WiFi password
+const char* ssid = "Vodafone De Grandis";     // Replace with your WiFi network name
+const char* password = "SanRocco20";  // Replace with your WiFi password
 const char* username = "";             // For enterprise networks only
 bool isEnterpriseNetwork = false;      // Set to true for enterprise networks
 
 // Server details
-const char serverAddress[] = "172.20.10.15"; // Replace with your server address
+const char serverAddress[] = "192.168.1.9"; // Replace with your server address
 const int serverPort = 3000;                           // Replace with your server port
 const String apiEndpoint = "/api/data";                // Replace with your API endpoint
 
 // Sensor pins
 const int temperatureSensorPin = A0;
-const int humiditySensorPin = A1;
-const int lightSensorPin = A2;
+// Rimuovi gli altri pin dei sensori se non usati
+// const int humiditySensorPin = A1;
+// const int lightSensorPin = A2;
 
 // Data collection interval (milliseconds)
 const unsigned long dataInterval = 10000; // 10 seconds
@@ -36,10 +37,10 @@ void setup() {
   while (!Serial) {
     ; // Wait for serial port to connect
   }
-  
+
   // Set LED pin as output
   pinMode(statusLed, OUTPUT);
-  
+
   // Connect to WiFi
   connectToWiFi();
 }
@@ -50,19 +51,20 @@ void loop() {
     Serial.println("WiFi connection lost. Reconnecting...");
     connectToWiFi();
   }
-  
+
   // Check if it's time to collect and send data
   unsigned long currentTime = millis();
   if (currentTime - lastDataTime >= dataInterval) {
     lastDataTime = currentTime;
-    
-    // Collect sensor data
+
+    // Collect sensor data (solo temperatura)
     float temperature = readTemperature();
-    float humidity = readHumidity();
-    int lightLevel = readLightLevel();
-    
-    // Send data to server
-    sendDataToServer(temperature, humidity, lightLevel);
+    // Rimuovi la lettura degli altri sensori
+    // float humidity = readHumidity();
+    // int lightLevel = readLightLevel();
+
+    // Send data to server (solo temperatura)
+    sendDataToServer(temperature);
   }
 }
 
@@ -130,6 +132,8 @@ float readTemperature() {
   return temperature;
 }
 
+// Rimuovi le funzioni readHumidity() e readLightLevel() se non usate
+/*
 float readHumidity() {
   // Read humidity sensor (example using analog sensor)
   int sensorValue = analogRead(humiditySensorPin);
@@ -154,24 +158,31 @@ int readLightLevel() {
   
   return lightLevel;
 }
+*/
 
-void sendDataToServer(float temperature, float humidity, int lightLevel) {
+// Modifica la funzione per accettare solo la temperatura
+void sendDataToServer(float temperature) {
   Serial.println("Sending data to server...");
-  
+
   // Create JSON document
-  StaticJsonDocument<200> jsonDoc;
-  
-  // Add sensor data
+  StaticJsonDocument<100> jsonDoc; // Riduci la dimensione se invii meno dati
+
+  // Add sensor data (solo temperatura)
   jsonDoc["temperature"] = temperature;
-  jsonDoc["humidity"] = humidity;
-  jsonDoc["light"] = lightLevel;
+  // Rimuovi gli altri dati
+  // jsonDoc["humidity"] = humidity;
+  // jsonDoc["light"] = lightLevel;
   jsonDoc["device_id"] = "nano33iot_1"; // Unique identifier for your device
   jsonDoc["timestamp"] = millis(); // You might want to use a real timestamp
-  
+
   // Serialize JSON to string
   String jsonString;
   serializeJson(jsonDoc, jsonString);
-  
+
+  // Stampa il JSON sulla console seriale
+  Serial.print("JSON to send: ");
+  Serial.println(jsonString);
+
   // Send HTTP POST request
   client.beginRequest();
   client.post(apiEndpoint);
@@ -180,16 +191,16 @@ void sendDataToServer(float temperature, float humidity, int lightLevel) {
   client.beginBody();
   client.print(jsonString);
   client.endRequest();
-  
+
   // Get response
   int statusCode = client.responseStatusCode();
   String response = client.responseBody();
-  
+
   Serial.print("Status code: ");
   Serial.println(statusCode);
   Serial.print("Response: ");
   Serial.println(response);
-  
+
   // Indicate success or failure
   if (statusCode >= 200 && statusCode < 300) {
     // Success - blink LED quickly 3 times

@@ -4,11 +4,11 @@
 #include <ArduinoJson.h>
 
 // WiFi credentials
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
+const char* ssid = "Vodafone De Grandis";     // Replace with your WiFi network name
+const char* password = "SanRocco20";  // Replace with your WiFi password
 
 // Server details
-const char* serverUrl = "http://YOUR_SERVER_IP:5000/api/data";
+const char* serverUrl = "http://192.168.1.9:3000/api/data";
 
 void setup() {
   Serial.begin(115200);
