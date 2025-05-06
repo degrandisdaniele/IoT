@@ -1,6 +1,8 @@
 
 #include <Arduino_HTS221.h>
 #include <PDM.h>
+#include <Wire.h>
+
 
 // Constants
 #define SERIAL_BAUD_RATE 9600
@@ -23,13 +25,20 @@ float microphoneDB = 0;
 float previousTemperature = 0;
 float previousHumidity = 0;
 unsigned long lastTempHumidityCheck = 0;
+unsigned long lastI2CUpdate = 0;
 #define SENSOR_CHECK_INTERVAL 1000  // Check temp/humidity every 1000ms
+#define I2C_UPDATE_INTERVAL 1000    // Send I2C data every 1000ms
+
+// Buffer for I2C data
+byte i2cDataBuffer[12];  // 3 floats (4 bytes each)
 
 // Function prototypes
 void onPDMdata();
 void updateLEDs(float soundDB);
 void printSensorData(float temperature, float humidity);
 float convertToDecibel(short soundValue);
+void requestEvent();
+void updateI2CData();
 
 void setup() {
   Serial.begin(SERIAL_BAUD_RATE);
@@ -59,6 +68,13 @@ void setup() {
     Serial.println("Failed to start PDM!");
     while (1);
   }
+  
+  // Initialize I2C as slave with address #8
+  Wire.begin(8);                
+  Wire.onRequest(requestEvent); // register event
+  
+  // Initialize I2C data buffer
+  updateI2CData();
 }
 
 void loop() {
@@ -103,6 +119,12 @@ void loop() {
       // Print regular sensor readings
       printSensorData(temperature, humidity);
     }
+  }
+  
+  // Update I2C data buffer every second
+  if (currentMillis - lastI2CUpdate >= I2C_UPDATE_INTERVAL) {
+    lastI2CUpdate = currentMillis;
+    updateI2CData();
   }
 }
 
@@ -170,4 +192,23 @@ void printSensorData(float temperature, float humidity) {
   Serial.println(" dB");
   
   Serial.println(); // Print an empty line
+}
+
+// Function to update the I2C data buffer with current sensor values
+void updateI2CData() {
+  float temperature = HTS.readTemperature();
+  float humidity = HTS.readHumidity();
+  
+  // Convert float values to bytes in the buffer
+  memcpy(i2cDataBuffer, &temperature, 4);
+  memcpy(i2cDataBuffer + 4, &humidity, 4);
+  memcpy(i2cDataBuffer + 8, &microphoneDB, 4);
+  
+  Serial.println("I2C data updated");
+}
+
+// Function to handle I2C request events
+void requestEvent() {
+  // Send the data over I2C
+  Wire.write(i2cDataBuffer, 12);
 }
