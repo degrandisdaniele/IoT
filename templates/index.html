@@ -1,35 +1,147 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IoT Data Dashboard</title>
+    <title>DeepDek - Monitoraggio Arnie</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>IoT Data Dashboard</h1>
-            <p>Real-time data from your Arduino device</p>
+            <h1>DeepDek</h1>
+            <p>Monitoraggio in tempo reale delle arnie</p>
+            <nav>
+                <button id="menuButton"><i class="fas fa-bars"></i></button>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="#dashboard">Dashboard</a>
+                    <a href="#arnie">Arnie</a>
+                    <a href="#meteo">Meteo</a>
+                    <a href="#grafici">Grafici</a>
+                    <a href="#miele">Produzione Miele</a>
+                    <a href="#batteria">Stato Batteria</a>
+                </div>
+            </nav>
         </header>
         
         <main>
             <div class="status-container">
                 <div class="status-indicator" id="connection-status">
                     <span class="status-dot disconnected"></span>
-                    <span class="status-text">Disconnected</span>
+                    <span class="status-text">Disconnesso</span>
                 </div>
-                <div class="last-update" id="last-update">Last update: Never</div>
+                <div class="last-update" id="last-update">Ultimo aggiornamento: Mai</div>
             </div>
             
-            <div class="data-container" id="data-container">
-                <div class="no-data-message">Waiting for data...</div>
-            </div>
+            <section id="arnie" class="section-container">
+                <h2>Le Mie Arnie</h2>
+                <div class="arnie-grid" id="arnie-container">
+                    <!-- Le arnie verranno aggiunte dinamicamente qui -->
+                    <div class="arnia-card">
+                        <h3>Arnia 1</h3>
+                        <div class="arnia-status active">Attiva</div>
+                        <div class="arnia-details">
+                            <p><strong>Popolazione:</strong> <span id="arnia1-popolazione">5000</span> api</p>
+                            <p><strong>Ultima attività:</strong> <span id="arnia1-attivita">10:30</span></p>
+                        </div>
+                    </div>
+                    <div class="arnia-card">
+                        <h3>Arnia 2</h3>
+                        <div class="arnia-status active">Attiva</div>
+                        <div class="arnia-details">
+                            <p><strong>Popolazione:</strong> <span id="arnia2-popolazione">4800</span> api</p>
+                            <p><strong>Ultima attività:</strong> <span id="arnia2-attivita">10:25</span></p>
+                        </div>
+                    </div>
+                    <div class="arnia-card">
+                        <h3>Arnia 3</h3>
+                        <div class="arnia-status warning">Attenzione</div>
+                        <div class="arnia-details">
+                            <p><strong>Popolazione:</strong> <span id="arnia3-popolazione">3200</span> api</p>
+                            <p><strong>Ultima attività:</strong> <span id="arnia3-attivita">09:45</span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="meteo" class="section-container">
+                <h2>Previsioni Meteo</h2>
+                <div class="meteo-container" id="meteo-container">
+                    <div class="meteo-now">
+                        <div class="meteo-icon">
+                            <i class="fas fa-sun"></i>
+                        </div>
+                        <div class="meteo-info">
+                            <h3>Oggi</h3>
+                            <p class="meteo-temp">24°C</p>
+                            <p>Soleggiato</p>
+                            <p>Umidità: 45%</p>
+                            <p>Vento: 5 km/h</p>
+                        </div>
+                    </div>
+                    <div class="meteo-forecast">
+                        <!-- Previsioni future -->
+                    </div>
+                </div>
+            </section>
+            
+            <section id="grafici" class="section-container">
+                <h2>Monitoraggio in Tempo Reale</h2>
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Temperatura</h3>
+                        <canvas id="temperatureChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Umidità</h3>
+                        <canvas id="humidityChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Volume Sonoro</h3>
+                        <canvas id="soundChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="miele" class="section-container">
+                <h2>Produzione Miele</h2>
+                <div class="honey-container">
+                    <div class="honey-jar">
+                        <div class="honey-level" id="honey-level" style="height: 60%;">
+                            <div class="honey-drip"></div>
+                        </div>
+                        <div class="honey-measurement">
+                            <p><span id="honey-amount">3.2</span> kg</p>
+                        </div>
+                    </div>
+                    <div class="honey-controls">
+                        <label for="honey-slider">Regola livello miele:</label>
+                        <input type="range" id="honey-slider" min="0" max="100" value="60">
+                    </div>
+                </div>
+            </section>
+            
+            <section id="batteria" class="section-container">
+                <h2>Stato Batteria</h2>
+                <div class="battery-container">
+                    <div class="battery-outer">
+                        <div class="battery-level" id="battery-level" style="width: 75%;">
+                            <div class="battery-animation"></div>
+                        </div>
+                    </div>
+                    <div class="battery-cap"></div>
+                    <div class="battery-percentage">
+                        <p><span id="battery-percentage">75</span>%</p>
+                    </div>
+                </div>
+            </section>
         </main>
         
         <footer>
-            <p>Arduino IoT Project &copy; 2023</p>
+            <p>DeepDek - Monitoraggio Arnie &copy; 2025</p>
         </footer>
     </div>
     
