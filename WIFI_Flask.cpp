@@ -16,9 +16,7 @@ const String apiEndpoint = "/api/data";                // Updated API endpoint
 
 // Sensor pins
 const int temperatureSensorPin = A0;
-// Rimuovi gli altri pin dei sensori se non usati
-// const int humiditySensorPin = A1;
-// const int lightSensorPin = A2;
+
 
 // Data collection interval (milliseconds)
 const unsigned long dataInterval = 10000; // 10 seconds
@@ -57,13 +55,7 @@ void loop() {
   if (currentTime - lastDataTime >= dataInterval) {
     lastDataTime = currentTime;
 
-    // Collect sensor data (solo temperatura)
     float temperature = readTemperature();
-    // Rimuovi la lettura degli altri sensori
-    // float humidity = readHumidity();
-    // int lightLevel = readLightLevel();
-
-    // Send data to server (solo temperatura)
     sendDataToServer(temperature);
   }
 }
