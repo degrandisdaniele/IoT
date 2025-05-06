@@ -8,7 +8,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # --- Configurazione ---
-SERVER_IP = "127.0.0.1"  # Indirizzo IP del tuo server Flask (usa 127.0.0.1 se è sulla stessa macchina)
+SERVER_IP = "172.20.10.3"  # Indirizzo IP del tuo server Flask (usa 127.0.0.1 se è sulla stessa macchina)
 SERVER_PORT = 3000       # Porta su cui è in ascolto il tuo server Flask
 API_ENDPOINT = "/api/data"
 DEVICE_ID = "python_simulator_1"

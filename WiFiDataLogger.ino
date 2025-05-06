@@ -4,8 +4,8 @@
 #include <ArduinoJson.h>
 
 // WiFi credentials
-const char* ssid = "Vodafone De Grandis";     // Replace with your WiFi network name
-const char* password = "SanRocco20";  // Replace with your WiFi password
+const char* ssid = "iPhone di Daniele";     // Replace with your WiFi network name
+const char* password = "123456789";  // Replace with your WiFi password
 const char* username = "";             // For enterprise networks only
 bool isEnterpriseNetwork = false;      // Set to true for enterprise networks
 
