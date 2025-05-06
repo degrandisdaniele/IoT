@@ -2,6 +2,7 @@
 #include <WiFiNINA.h>
 #include <ArduinoHttpClient.h>
 #include <ArduinoJson.h>
+#include <Wire.h>
 
 // WiFi credentials
 const char* ssid = "iPhone di Daniele";     // Replace with your WiFi network name
@@ -14,12 +15,21 @@ const char serverAddress[] = "172.20.10.3"; // Updated server address
 const int serverPort = 3000;                           // Updated to standard HTTP port
 const String apiEndpoint = "/api/data";                // Updated API endpoint
 
-// Sensor pins
-const int temperatureSensorPin = A0;
+// I2C settings
+#define SLAVE_ADDRESS 8
+#define DATA_SIZE 12  // 3 floats (4 bytes each)
 
+// Buffer to store received I2C data
+byte dataBuffer[DATA_SIZE];
+
+// Variables to store parsed sensor values
+float temperature = 0.0;
+float humidity = 0.0;
+float soundLevel = 0.0;
+float battery = 74.0;  // Default battery level (could be read from a sensor)
 
 // Data collection interval (milliseconds)
-const unsigned long dataInterval = 10000; // 10 seconds
+const unsigned long dataInterval = 1000; // 1 seconds
 unsigned long lastDataTime = 0;
 
 // Status LED
@@ -39,6 +49,11 @@ void setup() {
   // Set LED pin as output
   pinMode(statusLed, OUTPUT);
 
+  // Initialize I2C as master
+  Wire.begin();
+  Serial.println("Connected to I2C bus as master");
+  Serial.println("Reading data from slave device at address 8");
+
   // Connect to WiFi
   connectToWiFi();
 }
@@ -55,8 +70,11 @@ void loop() {
   if (currentTime - lastDataTime >= dataInterval) {
     lastDataTime = currentTime;
 
-    float temperature = readTemperature();
-    sendDataToServer(temperature);
+    // Read sensor data from I2C
+    readSensorDataFromI2C();
+    
+    // Send data to server
+    sendDataToServer();
   }
 }
 
@@ -110,70 +128,67 @@ void connectToWiFi() {
     IPAddress ip = WiFi.localIP();
     Serial.print("IP Address: ");
     Serial.println(ip);
+}
+
+void readSensorDataFromI2C() {
+  // Request data from the slave device
+  Wire.requestFrom(SLAVE_ADDRESS, DATA_SIZE);
+  
+  // Check if the correct amount of data is available
+  if (Wire.available() == DATA_SIZE) {
+    // Read the data into the buffer
+    for (int i = 0; i < DATA_SIZE; i++) {
+      dataBuffer[i] = Wire.read();
+    }
+    
+    // Parse the received bytes back into float values
+    memcpy(&temperature, dataBuffer, 4);
+    memcpy(&humidity, dataBuffer + 4, 4);
+    memcpy(&soundLevel, dataBuffer + 8, 4);
+    
+    // Print the values to Serial
+    Serial.println("\n--- Sensor Readings from I2C ---");
+    Serial.print("Temperature: ");
+    Serial.print(temperature);
+    Serial.println(" °C");
+    
+    Serial.print("Humidity: ");
+    Serial.print(humidity);
+    Serial.println(" %");
+    
+    Serial.print("Sound Level: ");
+    Serial.print(soundLevel);
+    Serial.println(" dB");
+    Serial.println("----------------------------------");
+  } else {
+    Serial.println("Error: Did not receive expected amount of data from I2C");
+    // Use default values if I2C read fails
+    temperature = 25.0;
+    humidity = 50.0;
+    soundLevel = 30.0;
   }
-
-float readTemperature() {
-  // Read temperature sensor (example using analog sensor)
-  int sensorValue = analogRead(temperatureSensorPin);
-  
-  // Convert to temperature (adjust formula based on your sensor)
-  // This is an example for a TMP36 sensor
-  float voltage = sensorValue * (3.3 / 1023.0);
-  float temperature = (voltage - 0.5) * 100;
-  
-  Serial.print("Temperature: ");
-  Serial.print(temperature);
-  Serial.println(" °C");
-  
-  return temperature;
 }
 
-// Rimuovi le funzioni readHumidity() e readLightLevel() se non usate
-/*
-float readHumidity() {
-  // Read humidity sensor (example using analog sensor)
-  int sensorValue = analogRead(humiditySensorPin);
-  
-  // Convert to humidity (adjust formula based on your sensor)
-  // This is a simplified example
-  float humidity = map(sensorValue, 0, 1023, 0, 100);
-  
-  Serial.print("Humidity: ");
-  Serial.print(humidity);
-  Serial.println(" %");
-  
-  return humidity;
-}
-
-int readLightLevel() {
-  // Read light sensor
-  int lightLevel = analogRead(lightSensorPin);
-  
-  Serial.print("Light level: ");
-  Serial.println(lightLevel);
-  
-  return lightLevel;
-}
-*/
-
-// Modifica la funzione per accettare solo la temperatura
-// Modified function to send data to the JSON placeholder service
-void sendDataToServer(float temperature) {
+// Modified function to send data to the server
+void sendDataToServer() {
   Serial.println("Sending data to server...");
 
   // Create JSON document
-  StaticJsonDocument<100> jsonDoc;
+  StaticJsonDocument<200> jsonDoc;
 
   // Add sensor data
   jsonDoc["temperature"] = temperature;
-  jsonDoc["device_id"] = "nano33iot_1";
+  jsonDoc["humidity"] = humidity;
+  jsonDoc["sound"] = soundLevel;
+  jsonDoc["battery"] = battery;
+  jsonDoc["device_id"] = "beehive_simulator_1";
   jsonDoc["timestamp"] = millis();
 
   // Serialize JSON to string
   String jsonString;
   serializeJson(jsonDoc, jsonString);
 
-  // Stampa il JSON sulla console seriale
+  // Print the JSON on the serial console
   Serial.print("JSON to send: ");
   Serial.println(jsonString);
 
