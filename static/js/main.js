@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Connessione Socket.IO
+    // Socket.IO Connection
     const socket = io();
     const connectionStatusDot = document.querySelector('#connection-status .status-dot');
     const connectionStatusText = document.querySelector('#connection-status .status-text');
     const lastUpdateElement = document.getElementById('last-update');
     
-    // Menu a tendina
+    // Dropdown menu
     const menuButton = document.getElementById('menuButton');
     const dropdownMenu = document.getElementById('dropdownMenu');
     
@@ -17,19 +17,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Chiudi il menu quando si clicca altrove
+    // Close menu when clicking elsewhere
     document.addEventListener('click', function(event) {
         if (!menuButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
             dropdownMenu.style.display = 'none';
         }
     });
     
-    // Inizializzazione dei grafici
+    // Charts initialization
     const temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
     const humidityCtx = document.getElementById('humidityChart').getContext('2d');
     const soundCtx = document.getElementById('soundChart').getContext('2d');
     
-    // Configurazione comune per i grafici
+    // Common chart configuration
     const chartConfig = {
         type: 'line',
         options: {
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     title: {
                         display: true,
-                        text: 'Orario'
+                        text: 'Time'
                     }
                 },
                 y: {
@@ -62,12 +62,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     
-    // Grafico Temperatura
+    // Temperature Chart
     const temperatureChart = new Chart(temperatureCtx, {
         ...chartConfig,
         data: {
             datasets: [{
-                label: 'Temperatura (°C)',
+                label: 'Temperature (°C)',
                 data: [],
                 borderColor: 'rgb(255, 99, 132)',
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -83,19 +83,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     ...chartConfig.options.scales.y,
                     title: {
                         ...chartConfig.options.scales.y.title,
-                        text: 'Temperatura (°C)'
+                        text: 'Temperature (°C)'
                     }
                 }
             }
         }
     });
     
-    // Grafico Umidità
+    // Humidity Chart
     const humidityChart = new Chart(humidityCtx, {
         ...chartConfig,
         data: {
             datasets: [{
-                label: 'Umidità (%)',
+                label: 'Humidity (%)',
                 data: [],
                 borderColor: 'rgb(54, 162, 235)',
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
@@ -111,19 +111,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     ...chartConfig.options.scales.y,
                     title: {
                         ...chartConfig.options.scales.y.title,
-                        text: 'Umidità (%)'
+                        text: 'Humidity (%)'
                     }
                 }
             }
         }
     });
     
-    // Grafico Volume Sonoro
+    // Sound Volume Chart
     const soundChart = new Chart(soundCtx, {
         ...chartConfig,
         data: {
             datasets: [{
-                label: 'Volume Sonoro (dB)',
+                label: 'Sound Volume (dB)',
                 data: [],
                 borderColor: 'rgb(75, 192, 192)',
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -139,14 +139,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     ...chartConfig.options.scales.y,
                     title: {
                         ...chartConfig.options.scales.y.title,
-                        text: 'Volume Sonoro (dB)'
+                        text: 'Sound Volume (dB)'
                     }
                 }
             }
         }
     });
     
-    // Controllo livello miele
+    // Honey level control
     const honeySlider = document.getElementById('honey-slider');
     const honeyLevel = document.getElementById('honey-level');
     const honeyAmount = document.getElementById('honey-amount');
@@ -154,16 +154,16 @@ document.addEventListener('DOMContentLoaded', function() {
     honeySlider.addEventListener('input', function() {
         const value = this.value;
         honeyLevel.style.height = value + '%';
-        honeyAmount.textContent = (value / 100 * 5).toFixed(1); // Massimo 5 kg
+        honeyAmount.textContent = (value / 100 * 5).toFixed(1); // Maximum 5 kg
     });
     
-    // Simulazione dati per i grafici
+    // Chart data simulation
     function addData(chart, value) {
         const now = new Date();
         chart.data.labels.push(now);
         chart.data.datasets[0].data.push(value);
         
-        // Limita il numero di punti dati
+        // Limit the number of data points
         if (chart.data.labels.length > 30) {
             chart.data.labels.shift();
             chart.data.datasets[0].data.shift();
@@ -172,28 +172,28 @@ document.addEventListener('DOMContentLoaded', function() {
         chart.update();
     }
     
-    // Connessione Socket.IO
+    // Socket.IO Connection
     socket.on('connect', () => {
-        console.log('Connesso al server');
+        console.log('Connected to server');
         connectionStatusDot.classList.remove('disconnected');
         connectionStatusDot.classList.add('connected');
-        connectionStatusText.textContent = 'Connesso';
+        connectionStatusText.textContent = 'Connected';
     });
     
     socket.on('disconnect', () => {
-        console.log('Disconnesso dal server');
+        console.log('Disconnected from server');
         connectionStatusDot.classList.remove('connected');
         connectionStatusDot.classList.add('disconnected');
-        connectionStatusText.textContent = 'Disconnesso';
+        connectionStatusText.textContent = 'Disconnected';
     });
     
     socket.on('new_data', (data) => {
-        console.log('Dati ricevuti:', data);
+        console.log('Data received:', data);
         
         const now = new Date();
-        lastUpdateElement.textContent = `Ultimo aggiornamento: ${now.toLocaleTimeString()}`;
+        lastUpdateElement.textContent = `Last update: ${now.toLocaleTimeString()}`;
         
-        // Aggiorna i grafici con i nuovi dati
+        // Update charts with new data
         if (data.hasOwnProperty('temperature')) {
             addData(temperatureChart, data.temperature);
         }
@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
             addData(soundChart, data.sound);
         }
         
-        // Aggiorna lo stato della batteria se disponibile
+        // Update battery status if available
         if (data.hasOwnProperty('battery')) {
             const batteryLevel = document.getElementById('battery-level');
             const batteryPercentage = document.getElementById('battery-percentage');
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Simulazione dati per test (rimuovere in produzione)
+    // Data simulation for testing (remove in production)
     function simulateData() {
         const temperature = 20 + Math.random() * 10;
         const humidity = 40 + Math.random() * 30;
@@ -229,6 +229,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(simulateData, 5000);
     }
     
-    // Avvia la simulazione (rimuovere in produzione)
+    // Start simulation (remove in production)
     simulateData();
 });
