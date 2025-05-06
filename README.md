@@ -1,24 +1,26 @@
-          
-# Arduino IoT Data Logger Project
 
+
+
+          
+# IoT Sensor Module WIFI Project
+
+## Overview
 This project implements an IoT data logging system using Arduino Nano 33 IoT boards to collect sensor data and transmit it to a server for storage and visualization.
 
 ## Project Overview
-
-The system consists of the following components:
-
-1. **Arduino Nano 33 IoT** - Collects sensor data and transmits it to a server
-2. **Web Server** - Receives, stores, and visualizes the sensor data
-3. **Simulators** - Python scripts that simulate Arduino devices for testing
+The system consists of two main components:
+1. A sensor module that collects environmental data (temperature, humidity, and sound levels)
+2. A WiFi module that transmits the collected data to a server
+3. Simulators - Python scripts that simulate Arduino devices for testing
 
 ## Hardware Requirements
-
 - Arduino Nano 33 IoT board
-- Temperature sensor (connected to analog pin A0)
-- Optional: Humidity sensor, light sensor, microphone
+- HTS221 temperature and humidity sensor
+- PDM microphone
+- I2C connection between modules
+- Optional: Additional sensors (light sensor)
 
 ## Software Requirements
-
 - Arduino IDE with the following libraries:
   - WiFiNINA
   - ArduinoHttpClient
@@ -29,125 +31,50 @@ The system consists of the following components:
 - Web browser
 
 ## Project Structure
-
-- **WiFiDataLogger.ino** - Main Arduino sketch for data logging
-- **WIFI.cpp** - Implementation of WiFi connectivity and web server functionality
+- **Module_sense.cpp** - Responsible for collecting sensor data
 - **WIFI_Flask.cpp** - Implementation for connecting to a Flask server
-- **example_of_sensor.cpp** - Example code for reading temperature and humidity sensors
-- **example_of_microphone.cpp** - Example code for using the onboard PDM microphone
+- **WiFiDataLogger.ino** - Main Arduino sketch for data logging
+- **app.py** - Flask server implementation
 - **arduino_simulator.py** - Python script to simulate Arduino data transmission
 - **beehive_simulator.py** - Python script to simulate beehive monitoring data
 - **static/js/main.js** - JavaScript for the web interface
 
+## Software Components
+
+### Module_sense.cpp
+This module is responsible for collecting sensor data:
+- Temperature and humidity using the HTS221 sensor
+- Sound levels using the PDM microphone
+- Provides visual feedback via RGB LED based on sound levels
+- Acts as an I2C slave (address 8) to provide sensor data when requested
+
+### WIFI_Flask.cpp
+This module handles data transmission:
+- Connects to a WiFi network
+- Reads sensor data from the sensor module via I2C
+- Formats data into JSON
+- Sends data to a server via HTTP POST requests
+- Provides status feedback via LED
+
 ## How It Works
-
 ### Arduino Data Collection
-
 1. The Arduino connects to a WiFi network using credentials specified in the code
-2. It periodically reads sensor data (temperature, and optionally humidity and light)
+2. It periodically reads sensor data (temperature, humidity, and sound)
 3. The data is formatted as JSON
 4. The data is sent to a server via HTTP POST requests
 5. LED indicators show the status of data transmission
 
-```
 Data Flow: Sensors → Arduino → WiFi → Server
-```
 
 ### Server Communication
-
 The Arduino sends data to a server with the following format:
-
 ```json
 {
-  "temperature": 23.5,
-  "device_id": "nano33iot_1",
-  "timestamp": 1234567890
+  "temperature": 25.93,
+  "humidity": 69.24,
+  "sound": 35.11,
+  "battery": 74.0,
+  "device_id": "beehive_simulator_1",
+  "timestamp": 1746541866349
 }
 ```
-
-Additional fields like humidity, light, and sound can be included depending on the sensors used.
-
-### Web Interface
-
-The project includes a web interface that:
-- Displays real-time sensor data
-- Allows configuration of the Arduino device
-- Visualizes data trends over time
-
-## Setup Instructions
-
-1. **Configure WiFi Settings**:
-   - Open the Arduino sketch (WiFiDataLogger.ino or WIFI_Flask.cpp)
-   - Update the WiFi credentials:
-     ```cpp
-     const char* ssid = "YourWiFiName";
-     const char* password = "YourPassword";
-     ```
-
-2. **Configure Server Settings**:
-   - Update the server address and port:
-     ```cpp
-     const char serverAddress[] = "192.168.1.9";
-     const int serverPort = 3000;
-     const String apiEndpoint = "/api/data";
-     ```
-
-3. **Upload to Arduino**:
-   - Connect your Arduino Nano 33 IoT board
-   - Upload the sketch using the Arduino IDE
-
-4. **Run the Server**:
-   - Set up a server to receive the data (not included in this repository)
-   - Alternatively, use the simulator scripts for testing
-
-## Using the Simulators
-
-For testing without physical hardware, you can use the provided Python simulators:
-
-```bash
-python arduino_simulator.py
-```
-
-or
-
-```bash
-python beehive_simulator.py
-```
-
-These scripts simulate sensor data and send it to the configured server.
-
-## Examples
-
-### Reading Temperature and Humidity
-
-The project includes example code for reading temperature and humidity from the HTS221 sensor on the Nano 33 IoT:
-
-```cpp
-float temperature = HTS.readTemperature();
-float humidity = HTS.readHumidity();
-```
-
-### Using the Microphone
-
-The project includes example code for using the onboard PDM microphone:
-
-```cpp
-PDM.onReceive(onPDMdata);
-PDM.begin(1, 16000);
-```
-
-## Troubleshooting
-
-- **WiFi Connection Issues**: Check your WiFi credentials and ensure the network is accessible
-- **Server Connection Issues**: Verify the server address and port are correct
-- **Sensor Reading Issues**: Check sensor connections and power
-
-## License
-
-This project is open source and available under the MIT License.
-
-## Contributing
-
-Contributions to this project are welcome. Please feel free to submit a Pull Request.
-
-        Too many current requests. Your queue position is 1. Please wait for a while or switch to other models for a smoother experience.
