@@ -216,6 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    
     // Data simulation for testing (remove in production)
     /*
     function simulateData() {

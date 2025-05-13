@@ -1,0 +1,9 @@
+Auto Cert Mgmt: false
+Dynos:          web: 1
+Git URL:        https://git.heroku.com/deep-dek-flask-app.git
+Owner:          de.grandis.daniele.01@gmail.com
+Region:         us
+Repo Size:      7 MB
+Slug Size:      20 MB
+Stack:          heroku-24
+Web URL:        https://deep-dek-flask-app-f92d90f30348.herokuapp.com/
