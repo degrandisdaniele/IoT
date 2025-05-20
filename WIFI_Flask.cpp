@@ -3,7 +3,6 @@
 #include <ArduinoHttpClient.h>
 #include <ArduinoJson.h>
 #include <Wire.h>
-#include <WiFiSSLClient.h> // Add this line for HTTPS
 
 // WiFi credentials
 const char* ssid = "iPhone di Daniele";     // Replace with your WiFi network name
@@ -13,8 +12,8 @@ bool isEnterpriseNetwork = false;      // Set to true for enterprise networks
 
 // Server details
 const char serverAddress[] = "deep-dek-flask-app-f92d90f30348.herokuapp.com"; // Updated server address
-const int serverPort = 443;                                                  // Updated to HTTPS port
-const String apiEndpoint = "/api/data";                                      // API endpoint for data submission
+const int serverPort = 443;                           // Updated to standard HTTP port
+const String apiEndpoint = "/api/data";                // Updated API endpoint
 
 // I2C settings
 #define SLAVE_ADDRESS 8
@@ -37,7 +36,8 @@ unsigned long lastDataTime = 0;
 const int statusLed = LED_BUILTIN;
 
 // WiFi client
-WiFiSSLClient wifi; // Changed from WiFiClient to WiFiSSLClient for HTTPS
+// WiFiClient wifi; // Commenta o rimuovi questa riga
+WiFiSSLClient wifi; // Usa WiFiSSLClient per HTTPS
 HttpClient client = HttpClient(wifi, serverAddress, serverPort);
 
 void setup() {
@@ -175,7 +175,7 @@ void sendDataToServer() {
   Serial.println("Sending data to server...");
 
   // Create JSON document
-  StaticJsonDocument<256> jsonDoc; // Aumentata per maggiore sicurezza
+  StaticJsonDocument<200> jsonDoc;
 
   // Add sensor data
   jsonDoc["temperature"] = temperature;
@@ -185,33 +185,19 @@ void sendDataToServer() {
   jsonDoc["device_id"] = "beehive_simulator_1";
   jsonDoc["timestamp"] = millis();
 
-  // Check if the document overflowed after adding data (optional but good practice)
-  if (jsonDoc.overflowed()) {
-    Serial.println(F("JSON document overflowed! Increase capacity."));
-    return; // Don't proceed if the document is too small
-  }
-
   // Serialize JSON to string
   String jsonString;
-  size_t bytesWritten = serializeJson(jsonDoc, jsonString); // Modifica: cattura size_t
-
-  // Check if serialization was successful
-  if (bytesWritten == 0) { // Modifica: controlla se bytesWritten è 0
-    Serial.println(F("serializeJson() failed (wrote 0 bytes)."));
-    // This can happen if jsonDoc is invalid or String allocation fails.
-    return; // Non procedere se la serializzazione fallisce
-  }
+  serializeJson(jsonDoc, jsonString);
 
   // Print the JSON on the serial console
   Serial.print("JSON to send: ");
   Serial.println(jsonString);
 
   // Send HTTP POST request
-  client.setTimeout(10000); 
   client.beginRequest();
   client.post(apiEndpoint);
   client.sendHeader("Content-Type", "application/json");
-  client.sendHeader("Content-Length", jsonString.length()); // jsonString.length() è corretto qui
+  client.sendHeader("Content-Length", jsonString.length());
   client.beginBody();
   client.print(jsonString);
   client.endRequest();
