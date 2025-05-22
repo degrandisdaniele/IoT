@@ -26,7 +26,16 @@ byte dataBuffer[DATA_SIZE];
 float temperature = 0.0;
 float humidity = 0.0;
 float soundLevel = 0.0;
-float battery = 74.0;  // Default battery level (could be read from a sensor)
+float battery = 0.0;  // Default battery level (could be read from a sensor)
+
+// Variables to store parsed sensor values
+const int batteryPin = A0;            // Analog input pin
+const float arduinoRefVoltage = 3.33;  // Nano 33 IoT ADC reference voltage
+const float resistorFactor = (332.4 + 508.4) / 332.4;  // ~2.54 for 910kΩ and 590kΩ resistors
+float temperature = 0.0;
+float humidity = 0.0;
+float soundLevel = 0.0;
+// float battery = readBatteryLevel();  // Default battery level (could be read from a sensor)
 
 // Data collection interval (milliseconds)
 const unsigned long dataInterval = 1000; // 1 seconds
@@ -181,7 +190,7 @@ void sendDataToServer() {
   jsonDoc["temperature"] = temperature;
   jsonDoc["humidity"] = humidity;
   jsonDoc["sound"] = soundLevel;
-  jsonDoc["battery"] = battery;
+  jsonDoc["battery"] = readBatteryLevel ();
   jsonDoc["device_id"] = "beehive_simulator_1";
   jsonDoc["timestamp"] = millis();
 
@@ -231,4 +240,44 @@ void sendDataToServer() {
     }
     digitalWrite(statusLed, HIGH); // Back to solid on
   }
+}
+
+// Add this function definition with your other functions
+float readBatteryLevel() {
+  // Take multiple readings for better accuracy
+  const int numReadings = 10;
+  long sum = 0;
+  
+  for(int i = 0; i < numReadings; i++) {
+    sum += analogRead(batteryPin);
+    delay(2); // Short delay between readings
+  }
+  
+  int rawValue = sum / numReadings;
+  
+  // Convert analog reading to voltage at pin A0
+  float voltageAtPin = (rawValue / 1023.0) * arduinoRefVoltage;
+  
+  // Calculate actual battery voltage using the resistor divider ratio
+  float batteryVoltage = voltageAtPin * resistorFactor;
+  
+  // Convert voltage to percentage
+  float minVoltage = 6.5;  // Empty battery voltage (minimum for Arduino)
+  float maxVoltage = 8.4;  // Full battery voltage
+  float percentage = ((batteryVoltage - minVoltage) / (maxVoltage - minVoltage)) * 100.0;
+  
+  // Constrain to valid range
+  percentage = constrain(percentage, 0.0, 100.0);
+  
+  Serial.print("Raw ADC: ");
+  Serial.print(rawValue);
+  Serial.print(", Voltage at A0: ");
+  Serial.print(voltageAtPin);
+  Serial.print("V, Battery Voltage: ");
+  Serial.print(batteryVoltage);
+  Serial.print("V, Battery Percentage: ");
+  Serial.print(percentage);
+  Serial.println("%");
+  
+  return percentage;
 }
