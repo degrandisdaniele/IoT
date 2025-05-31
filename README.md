@@ -1,8 +1,5 @@
-
-
-
           
-# IoT Sensor Module WIFI Project
+# IoT Sensor Module WIFI Project MSE Course  2025 SUPSI
 
 ## Overview
 This project implements an IoT data logging system using Arduino Nano 33 IoT boards to collect sensor data and transmit it to a server for storage and visualization.
@@ -11,14 +8,12 @@ This project implements an IoT data logging system using Arduino Nano 33 IoT boa
 The system consists of two main components:
 1. A sensor module that collects environmental data (temperature, humidity, and sound levels)
 2. A WiFi module that transmits the collected data to a server
-3. Simulators - Python scripts that simulate Arduino devices for testing
 
 ## Hardware Requirements
 - Arduino Nano 33 IoT board
 - HTS221 temperature and humidity sensor
 - PDM microphone
 - I2C connection between modules
-- Optional: Additional sensors (light sensor)
 
 ## Software Requirements
 - Arduino IDE with the following libraries:
@@ -35,8 +30,7 @@ The system consists of two main components:
 - **WIFI_Flask.cpp** - Implementation for connecting to a Flask server
 - **WiFiDataLogger.ino** - Main Arduino sketch for data logging
 - **app.py** - Flask server implementation
-- **arduino_simulator.py** - Python script to simulate Arduino data transmission
-- **beehive_simulator.py** - Python script to simulate beehive monitoring data
+- **templates/index.html** - HTML template for the web interface
 - **static/js/main.js** - JavaScript for the web interface
 
 ## Software Components
