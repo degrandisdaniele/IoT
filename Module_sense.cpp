@@ -146,8 +146,6 @@ float convertToDecibel(short soundValue) {
   if (soundValue <= 0) soundValue = 1;
   
   // Convert to decibels
-  // This is a simplified conversion - you may need to calibrate based on your microphone
-  // Reference level is arbitrary here - you might need to adjust based on your hardware
   float dB = 20.0 * log10(soundValue / 1.0);
   
   // Ensure reasonable range (adjust as needed for your application)

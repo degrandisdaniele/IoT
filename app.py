@@ -57,6 +57,5 @@ def handle_disconnect():
 
 if __name__ == '__main__':
     logger.info("Starting IoT Data Server...")
-    # Le port est bien défini sur 3000
     socketio.run(app, host='0.0.0.0', port=3000, debug=True, allow_unsafe_werkzeug=True)
 
