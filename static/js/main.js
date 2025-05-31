@@ -216,21 +216,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    
-    // Data simulation for testing (remove in production)
-    /*
-    function simulateData() {
-        const temperature = 20 + Math.random() * 10;
-        const humidity = 40 + Math.random() * 30;
-        const sound = 30 + Math.random() * 20;
-        
-        addData(temperatureChart, temperature);
-        addData(humidityChart, humidity);
-        addData(soundChart, sound);
-        setTimeout(simulateData, 1000); // Simulate data every second
-    }
-    
-    // Start simulation (remove in production)
-    simulateData();
-    */
 });

@@ -5,15 +5,15 @@
 #include <Wire.h>
 
 // WiFi credentials
-const char* ssid = "Redmi Note 9";     // Replace with your WiFi network name
-const char* password = "12345678a";  // Replace with your WiFi password
-const char* username = "";             // For enterprise networks only
-bool isEnterpriseNetwork = false;      // Set to true for enterprise networks
+const char* ssid = "Redmi Note 9";     // Wifi name 
+const char* password = "12345678a";  // Wifi password
+const char* username = "";             
+bool isEnterpriseNetwork = false;      
 
 // Server details
-const char serverAddress[] = "deep-dek-flask-app-f92d90f30348.herokuapp.com"; // Updated server address
-const int serverPort = 443;                           // Updated to standard HTTP port
-const String apiEndpoint = "/api/data";                // Updated API endpoint
+const char serverAddress[] = "deep-dek-flask-app-f92d90f30348.herokuapp.com"; // Server address
+const int serverPort = 443;                           // Updated to standard HTTPS
+const String apiEndpoint = "/api/data";                // API endpoint
 
 // I2C settings
 #define SLAVE_ADDRESS 8
@@ -24,29 +24,28 @@ byte dataBuffer[DATA_SIZE];
 
 // RGB LED pins
 const int redPin = 4;
-const int greenPin = 2; // Corrected green pin to 4 as per your request
+const int greenPin = 2; 
 const int bluePin = 3;
 
 // Variables to store parsed sensor values
 const int batteryPin = A0;            // Analog input pin
 const float arduinoRefVoltage = 3.33;  // Nano 33 IoT ADC reference voltage
 const float resistorFactor = (332.4 + 508.4) / 332.4;  // ~2.54 for 910kΩ and 590kΩ resistors
+
 // Variables to store parsed sensor values
 float temperature = 0.0;
 float humidity = 0.0;
 float soundLevel = 0.0;
-float battery = 74.0;  // Default battery level (could be read from a sensor)
+float battery = 0.0;  
 
 // Data collection interval (milliseconds)
 const unsigned long dataInterval = 1000; // 1 seconds
 unsigned long lastDataTime = 0;
 
-// Status LED
-// const int statusLed = LED_BUILTIN; // Rimosso
-const int internetStatusLedPin = 5; // LED for internet connection status AND server status
+// Status LED WIFI
+const int internetStatusLedPin = 5; 
 
 // WiFi client
-// WiFiClient wifi; // Commenta o rimuovi questa riga
 WiFiSSLClient wifi; // Usa WiFiSSLClient per HTTPS
 HttpClient client = HttpClient(wifi, serverAddress, serverPort);
 
@@ -57,7 +56,6 @@ void setup() {
   while (!Serial && (millis() - startMillis < 3000));
 
   // Set LED pin as output
-  // pinMode(statusLed, OUTPUT); // Rimosso
   pinMode(internetStatusLedPin, OUTPUT); // Set internet status LED pin as output
   digitalWrite(internetStatusLedPin, LOW); // Start with LED OFF
 
@@ -73,6 +71,7 @@ void setup() {
 
   int currentBatteryLevel = readBatteryLevel();
   updateLedStatus(currentBatteryLevel);
+
   // Connect to WiFi
   connectToWiFi();
 }
@@ -80,8 +79,6 @@ void setup() {
 void loop() {
   // Real-time check of WiFi connection status for LED
   if (WiFi.status() == WL_CONNECTED) {
-    // If we are not in the middle of server communication blinking, keep it HIGH for WiFi connected
-    // The server communication blinking in sendDataToServer will temporarily override this
     digitalWrite(internetStatusLedPin, HIGH); 
   } else {
     digitalWrite(internetStatusLedPin, LOW); // Internet is NOT connected, LED OFF
@@ -97,12 +94,12 @@ void loop() {
     // Read sensor data from I2C
     readSensorDataFromI2C();
     
-    // Read battery level and update LED
+    // Read battery level and update LED battery status
     int batteryPercentage = readBatteryLevel();
-    updateLedStatus(batteryPercentage); // Update LED based on battery
+    updateLedStatus(batteryPercentage); 
 
     // Send data to server
-    sendDataToServer(); // This function also calls readBatteryLevel()
+    sendDataToServer();
   }
 }
 
@@ -110,7 +107,7 @@ void connectToWiFi() {
 
     Serial.print("Connecting to WiFi network: ");
     Serial.println(ssid);
-    // digitalWrite(internetStatusLedPin, LOW); // LED is OFF before attempting to connect or stays OFF if already so
+
     
     // Check for the WiFi module
     if (WiFi.status() == WL_NO_MODULE) {
@@ -133,7 +130,7 @@ void connectToWiFi() {
     bool ledState = LOW;
 
     if (isEnterpriseNetwork) {
-      // For enterprise networks (WPA2-Enterprise)
+      // For enterprise networks 
       Serial.println("Using enterprise WiFi authentication");
       WiFi.beginEnterprise(ssid, username, password);
       
@@ -147,11 +144,9 @@ void connectToWiFi() {
           digitalWrite(internetStatusLedPin, ledState);
         }
         Serial.print(".");
-        // Add a small delay to allow WiFi processes to run, but not too long to miss blinks
         delay(50); 
       }
     } else {
-      // For regular WPA/WPA2 networks
       while (status != WL_CONNECTED) {
         Serial.print("Attempting to connect to SSID: ");
         Serial.println(ssid);
@@ -168,8 +163,8 @@ void connectToWiFi() {
                 ledState = !ledState;
                 digitalWrite(internetStatusLedPin, ledState);
             }
-            status = WiFi.status(); // Check status inside the loop
-            delay(50); // Small delay
+            status = WiFi.status(); 
+            delay(50); 
         }
         if (status != WL_CONNECTED) {
             Serial.println("Connection attempt failed, retrying...");
@@ -179,14 +174,13 @@ void connectToWiFi() {
     
     if (WiFi.status() == WL_CONNECTED) {
         Serial.println("Connected to WiFi");
-        digitalWrite(internetStatusLedPin, HIGH); // Turn ON internet status LED solid
-        // Stampa l'indirizzo IP dell'Arduino
+        digitalWrite(internetStatusLedPin, HIGH); 
         IPAddress ip = WiFi.localIP();
         Serial.print("IP Address: ");
         Serial.println(ip);
     } else {
         Serial.println("Failed to connect to WiFi after multiple attempts.");
-        digitalWrite(internetStatusLedPin, LOW); // Ensure LED is OFF if connection ultimately fails
+        digitalWrite(internetStatusLedPin, LOW);
     }
 }
 
@@ -222,6 +216,7 @@ void readSensorDataFromI2C() {
     Serial.println("----------------------------------");
   } else {
     Serial.println("Error: Did not receive expected amount of data from I2C");
+    
     // Use default values if I2C read fails
     temperature = 25.0;
     humidity = 50.0;
@@ -235,8 +230,8 @@ void updateLedStatus(int batteryPercentage) {
     digitalWrite(greenPin, HIGH);
     digitalWrite(bluePin, LOW);
   } else if (batteryPercentage > 25) { // Orange for > 25% and <= 75%
-    digitalWrite(redPin, HIGH);    // Red ON
-    digitalWrite(greenPin, HIGH);   // Green ON (to make Orange)
+    digitalWrite(redPin, HIGH);    
+    digitalWrite(greenPin, HIGH);   
     digitalWrite(bluePin, LOW);
   } else { // Red for <= 25%
     digitalWrite(redPin, HIGH);
@@ -245,15 +240,14 @@ void updateLedStatus(int batteryPercentage) {
   }
 }
 
-// Add this function definition with your other functions
 int readBatteryLevel() {
-  // Take multiple readings for better accuracy
+
   const int numReadings = 10;
   long sum = 0;
   
   for(int i = 0; i < numReadings; i++) {
     sum += analogRead(batteryPin);
-    delay(2); // Short delay between readings
+    delay(2); 
   }
   
   int rawValue = sum / numReadings;
@@ -285,7 +279,7 @@ int readBatteryLevel() {
   return percentage;
 }
 
-// Modified function to send data to the server
+
 void sendDataToServer() {
   Serial.println("Sending data to server...");
 
@@ -337,8 +331,6 @@ void sendDataToServer() {
       digitalWrite(internetStatusLedPin, LOW);
       delay(100);
     }
-    // After blinking, if WiFi is still connected, it should go back to HIGH in the next loop() iteration
-    // Or set it high here if you want immediate feedback before loop() runs again
     if(WiFi.status() == WL_CONNECTED) digitalWrite(internetStatusLedPin, HIGH); 
     else digitalWrite(internetStatusLedPin, LOW);
 
@@ -350,7 +342,6 @@ void sendDataToServer() {
       digitalWrite(internetStatusLedPin, LOW);
       delay(500);
     }
-    // After blinking, restore LED state based on WiFi connection
     if(WiFi.status() == WL_CONNECTED) digitalWrite(internetStatusLedPin, HIGH); 
     else digitalWrite(internetStatusLedPin, LOW);
   }
